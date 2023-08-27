@@ -36,5 +36,9 @@
   
     - localhost:8081/swagger 
 
+  User jwt token as:
+  
+    - Bearer (Your token)
+
 
   <br/>
