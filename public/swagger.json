@@ -1,0 +1,368 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "title": "User Service API.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/refresh": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Обновить токены.",
+        "operationId": "RefreshRequest",
+        "parameters": [
+          {
+            "x-go-name": "Data",
+            "name": "refresh_token",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Refresh"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/SuccessRefresh"
+          },
+          "400": {
+            "$ref": "#/responses/BadInputDataResponse"
+          },
+          "401": {
+            "$ref": "#/responses/UnauthorizedResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/signin": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Получить токены аутентификации.",
+        "operationId": "SigninRequest",
+        "parameters": [
+          {
+            "x-go-name": "Data",
+            "name": "auth_params",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/SuccessSignIn"
+          },
+          "400": {
+            "$ref": "#/responses/BadInputDataResponse"
+          },
+          "403": {
+            "$ref": "#/responses/AuthErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/signup": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Зарегестрировать нового пользователя.",
+        "operationId": "SignupRequest",
+        "parameters": [
+          {
+            "x-go-name": "Data",
+            "name": "register_params",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/SuccessSignUp"
+          },
+          "400": {
+            "$ref": "#/responses/BadInputDataResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
+    "/{username}/note": {
+      "post": {
+        "security": [
+          {
+            "Cookie": [
+              "[]"
+            ]
+          },
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "notes"
+        ],
+        "summary": "Создать новую заметку.",
+        "operationId": "NoteRequest",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Username",
+            "name": "username",
+            "in": "path",
+            "required": true
+          },
+          {
+            "x-go-name": "Data",
+            "name": "note",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Input"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/SuccessNote"
+          },
+          "422": {
+            "$ref": "#/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/responses/ServerErrorNotePostResponse"
+          }
+        }
+      }
+    },
+    "/{username}/notes": {
+      "get": {
+        "security": [
+          {
+            "Cookie": [
+              "[]"
+            ]
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "notes"
+        ],
+        "summary": "Получить все заметки пользователя.",
+        "operationId": "NotesRequest",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Username",
+            "name": "username",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/SuccessNotes"
+          },
+          "500": {
+            "$ref": "#/responses/ServerErrorNoteGetResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "IncorrectWord": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "replacements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Replacements"
+        },
+        "word": {
+          "type": "string",
+          "x-go-name": "Word"
+        }
+      },
+      "x-go-package": "noteservice/model"
+    },
+    "Input": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "x-go-name": "Text"
+        }
+      },
+      "x-go-package": "noteservice/model"
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        }
+      },
+      "x-go-package": "noteservice/model"
+    },
+    "Refresh": {
+      "type": "object",
+      "properties": {
+        "refresh_token": {
+          "type": "string",
+          "x-go-name": "RefreshToken"
+        }
+      },
+      "x-go-package": "noteservice/model"
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IncorrectWord"
+          },
+          "x-go-name": "Errors"
+        },
+        "result": {
+          "type": "string",
+          "x-go-name": "Result"
+        }
+      },
+      "x-go-package": "noteservice/model"
+    },
+    "Tokens": {
+      "type": "object",
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "x-go-name": "AccessToken"
+        },
+        "refresh_token": {
+          "type": "string",
+          "x-go-name": "RefreshToken"
+        }
+      },
+      "x-go-package": "noteservice/model"
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-package": "noteservice/model"
+    }
+  },
+  "responses": {
+    "AuthErrorResponse": {
+      "description": ""
+    },
+    "BadInputDataResponse": {
+      "description": ""
+    },
+    "ServerErrorNoteGetResponse": {
+      "description": ""
+    },
+    "ServerErrorNotePostResponse": {
+      "description": ""
+    },
+    "ServerErrorResponse": {
+      "description": ""
+    },
+    "SuccessNote": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "SuccessNotes": {
+      "description": "",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "SuccessRefresh": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Tokens"
+      }
+    },
+    "SuccessSignIn": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Tokens"
+      }
+    },
+    "SuccessSignUp": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Message"
+      }
+    },
+    "UnauthorizedResponse": {
+      "description": ""
+    },
+    "UnprocessableEntity": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    },
+    "Cookie": {
+      "type": "apiKey",
+      "name": "token",
+      "in": "cookie"
+    }
+  }
+}

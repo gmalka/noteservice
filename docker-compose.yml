@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  noteservice:
+    build: ./
+    container_name: noteservice_container
+    ports:
+      - 127.0.0.1:8081:8081
+    depends_on:
+      - migrate
+    networks:
+      - mynetwork
+  db:
+    image: postgres
+    container_name: db_container
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_TABLE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  migrate:
+    image: migrate/migrate
+    container_name: migrate_container
+    volumes:
+      - ./database/migrate:/migration
+    networks:
+      - mynetwork
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migration",
+        "-database",
+        "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_TABLE}?sslmode=${DB_SSLMODE}",
+      ]
+    command: ["up"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+  test:
+    build:
+      context: ./
+      dockerfile: Dockerfile_test
+    container_name: test_container
+
+networks:
+  mynetwork:
+    driver: bridge
